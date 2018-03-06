@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -38,7 +38,11 @@ namespace Avro.Test
         // If additional tests are added then each test will need its own CompilerResults.
         private static CompilerResults compres;
 
-        [TestCase(@"{
+		// Complation isn't yet supported in corefx
+		// https://github.com/dotnet/corefx/issues/12180
+#if !NETCOREAPP1_0 && !NETCOREAPP1_1 && !NETCOREAPP2_0
+
+	    [TestCase(@"{
   ""protocol"" : ""MyProtocol"",
   ""namespace"" : ""com.foo"",
   ""types"" : [
@@ -189,9 +193,9 @@ namespace Avro.Test
 
 
             // compile
-            var comparam = new CompilerParameters(new string[] { "mscorlib.dll" });
+            var comparam = new CompilerParameters(new[] { "netstandard.dll" });
             comparam.ReferencedAssemblies.Add("System.dll");
-            comparam.ReferencedAssemblies.Add("Avro.dll");
+	        comparam.ReferencedAssemblies.Add(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Avro.dll"));
             comparam.GenerateInMemory = true;
             var ccp = new Microsoft.CSharp.CSharpCodeProvider();
             var units = new CodeCompileUnit[] { compileUnit };
@@ -225,8 +229,9 @@ namespace Avro.Test
             Assert.IsFalse(rec2 == null);
             AssertSpecificRecordEqual(rec, rec2);
         }
+#endif
 
-        [TestCase]
+		[TestCase]
         public void TestEnumResolution()
         {
             Schema writerSchema = Schema.Parse("{\"type\":\"record\",\"name\":\"EnumRecord\",\"namespace\":\"Avro.Test\"," +

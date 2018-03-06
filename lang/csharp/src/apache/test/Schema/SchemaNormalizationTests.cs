@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -22,6 +22,7 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using System.IO;
+using System.Reflection;
 using Avro.Test.Utils;
 using Avro;
 
@@ -50,7 +51,8 @@ namespace Avro.Test
 
         private static List<object[]> ProvideFingerprintTestCases()
         {
-            using (StreamReader reader = new StreamReader("../../../../../share/test/data/schema-tests.txt"))
+	        using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Avro.test.Schema.schema-tests.txt"))
+	        using (var reader = new StreamReader(stream))
             {
                 return CaseFinder.Find(reader, "fingerprint", new List<object[]>());
             }
@@ -58,11 +60,12 @@ namespace Avro.Test
 
         private static List<object[]> ProvideCanonicalTestCases()
         {
-            using (StreamReader reader = new StreamReader("../../../../../share/test/data/schema-tests.txt"))
-            {
-                return CaseFinder.Find(reader, "canonical", new List<object[]>());
-            }
-        }
+			using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Avro.test.Schema.schema-tests.txt"))
+			using (var reader = new StreamReader(stream))
+			{
+				return CaseFinder.Find(reader, "canonical", new List<object[]>());
+			}
+		}
 
         private static long AltFingerprint(string s)
         {

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -17,6 +17,7 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Text;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -281,17 +282,15 @@ namespace Avro.Specific
         /// <returns>Default constructor for the type</returns>
         public CtorDelegate GetConstructor(string name, Schema.Type schemaType, Type type)
         {
-            ConstructorInfo ctorInfo = type.GetConstructor(Type.EmptyTypes);
-            if (ctorInfo == null)
+            var ctorInfo = type.GetConstructor(Type.EmptyTypes);
+
+	        if (ctorInfo == null)
                 throw new AvroException("Class " + name + " has no default constructor");
 
-            DynamicMethod dynMethod = new DynamicMethod("DM$OBJ_FACTORY_" + name, typeof(object), null, type, true);
-            ILGenerator ilGen = dynMethod.GetILGenerator();
-            ilGen.Emit(OpCodes.Nop);
-            ilGen.Emit(OpCodes.Newobj, ctorInfo);
-            ilGen.Emit(OpCodes.Ret);
+	        var expression = Expression.Lambda<CtorDelegate>(
+		        Expression.New(ctorInfo));
 
-            return (CtorDelegate)dynMethod.CreateDelegate(ctorType);
+            return expression.Compile();
         }
 
         /// <summary>

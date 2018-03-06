@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -15,11 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// Complation isn't yet supported in corefx
+// https://github.com/dotnet/corefx/issues/12180
+#if !NETCOREAPP1_0 && !NETCOREAPP1_1 && !NETCOREAPP2_0
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.CodeDom.Compiler;
+using System.Reflection;
 using Microsoft.CSharp;
 using NUnit.Framework;
 using Avro.Specific;
@@ -110,10 +116,10 @@ namespace Avro.Test
         {
             var compileUnit = schema.GenerateCode();
 
-            var comparam = new CompilerParameters(new string[] { "mscorlib.dll" });
+            var comparam = new CompilerParameters(new[] { "netstandard.dll" });
             comparam.ReferencedAssemblies.Add("System.dll");
-            comparam.ReferencedAssemblies.Add("Avro.dll");
-            comparam.GenerateInMemory = true;
+	        comparam.ReferencedAssemblies.Add(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Avro.dll"));
+			comparam.GenerateInMemory = true;
             var ccp = new CSharpCodeProvider();
             var units = new[] { compileUnit };
             var compres = ccp.CompileAssemblyFromDom(comparam, units);
@@ -127,3 +133,4 @@ namespace Avro.Test
         }
     }
 }
+#endif
